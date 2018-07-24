@@ -1,0 +1,115 @@
+      <?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Lembur extends CI_Controller {
+public function __construct()
+    {
+        parent::__construct();
+        $this->load->model('MLembur','Lembur');
+        $this->load->library('session');
+         if($this->session->userdata('status') != "login"){
+   redirect(base_url("Login"));
+  }
+    }
+
+    public function index()
+    {
+        $this->load->helper('url');
+        $this->load->helper('form');
+        
+        
+        $this->load->view('lembur/itampil');
+    }
+
+    public function ajax_list()
+    {
+        
+        $list = $this->Lembur->get_datatables();
+        $data = array();
+        $no = $_POST['start'];
+        foreach ($list as $customers) {
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = $customers->nip;
+            $row[] = $customers->nama;
+            $row[] = $customers->tanggal;
+            $row[] = $customers->jam_mulai;
+            $row[] = $customers->jumlah;
+            
+            $data[] = $row;
+        }
+
+        $output = array(
+                        "draw" => $_POST['draw'],
+                        "recordsTotal" => $this->Lembur->count_all(),
+                        "recordsFiltered" => $this->Lembur->count_filtered(),
+                        "data" => $data,
+                );
+        //output to json format
+        echo json_encode($output);
+    }
+    
+ function simpan()
+    {
+        $nip=$this->input->post('nip');
+        $nama=$this->input->post('nama');
+        $jumlah=$this->input->post('jumlah');
+       
+            $simpan_data=array(
+            'nip'  => $nip,
+            'nama'      => $nama,
+             'tanggal'      => date("Y-m-d"),
+              'jam_mulai'      => date("h:i:s"),
+            'jumlah'      => $jumlah
+              
+       );
+        $simpan = $this->db->insert('lembur', $simpan_data);
+         
+      
+          $this->session->set_flashdata('success','Data Yang anda masukan berhasil.');
+        redirect('Lembur');
+        return $simpan;
+       
+    }
+
+ 
+    function karyawan()
+    {
+        $return_arr = array();
+        $row_array = array();
+        $text = $this->input->get('text');
+        $barang = $this->db->select("*")
+                                             ->from("karyawan")
+                                             ->like("nip", $text)
+                                             ->or_like("nama",$text)
+                                             ->get();
+        if($barang->num_rows() > 0)
+        {
+
+            foreach($barang->result_array() as $row)
+            {
+                $row_array['id'] = $row['nip'];
+                $row_array['text'] = utf8_encode(" $row[nip]");
+                array_push($return_arr,$row_array);
+            }
+
+        }
+        
+        echo json_encode(array("results" => $return_arr ));
+    }
+   
+        function get_info()
+    {
+        $id = $this->input->get('id');
+        
+        $info = $this->db->select("*")
+                                         ->from("karyawan")
+                                         ->where("nip",$id)
+                                         ->get()
+                                         ->row();
+        echo json_encode($info);
+                                         
+    }
+    
+}

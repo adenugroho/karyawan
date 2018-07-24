@@ -1,0 +1,23 @@
+.gallery-cats {margin: 0px 0px 20px 0px;}
+.gallery-cats li{
+	list-style: none; 
+	float: left; 
+	padding: 0px 10px;
+	border-left: 1px dotted #a9a9a9;
+}
+.gallery-cats li:first-child{border-left:0px;}
+
+.clearfix {
+  *zoom: 1;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  line-height: 0;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}
